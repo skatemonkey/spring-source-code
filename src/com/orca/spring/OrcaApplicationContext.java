@@ -94,6 +94,11 @@ public class OrcaApplicationContext {
                 }
             }
 
+            // Aware 回调
+            if (instance instanceof BeanNameAware) {
+                ((BeanNameAware) instance).setBeanName(beanName);
+            }
+
             return instance;
         } catch (InstantiationException e) {
             throw new RuntimeException(e);
