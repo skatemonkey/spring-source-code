@@ -7,5 +7,6 @@ public class Test {
         OrcaApplicationContext applicationContext = new OrcaApplicationContext(AppConfig.class);
 
         UserService userService = (UserService) applicationContext.getBean("userService");
+        userService.test();
     }
 }

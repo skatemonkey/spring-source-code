@@ -1,6 +1,8 @@
 package com.orca.spring;
 
+import java.beans.Introspector;
 import java.io.File;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.concurrent.ConcurrentHashMap;
@@ -41,6 +43,11 @@ public class OrcaApplicationContext {
 
                                 Component component = clazz.getAnnotation(Component.class);
                                 String beanName = component.value();
+
+                                if (beanName.equals("")) {
+                                    beanName = Introspector.decapitalize(clazz.getSimpleName());
+                                }
+
                                 // BeanDefinition
                                 BeanDefinition beanDefinition = new BeanDefinition();
                                 beanDefinition.setType(clazz);
@@ -78,6 +85,14 @@ public class OrcaApplicationContext {
         Class clazz = beanDefinition.getType();
         try {
             Object instance = clazz.getConstructor().newInstance();
+
+            // Dependency Injection 依赖注入
+            for (Field f : clazz.getDeclaredFields()) {
+                if (f.isAnnotationPresent(Autowired.class)) {
+                    f.setAccessible(true);
+                    f.set(instance, getBean(f.getName()));
+                }
+            }
 
             return instance;
         } catch (InstantiationException e) {
