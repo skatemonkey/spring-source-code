@@ -1,6 +1,7 @@
 package com.orca.spring;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -74,7 +75,20 @@ public class OrcaApplicationContext {
     }
 
     private Object createBean(String beanName, BeanDefinition beanDefinition) {
-        return null;
+        Class clazz = beanDefinition.getType();
+        try {
+            Object instance = clazz.getConstructor().newInstance();
+
+            return instance;
+        } catch (InstantiationException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        } catch (InvocationTargetException e) {
+            throw new RuntimeException(e);
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public Object getBean(String beanName) {
