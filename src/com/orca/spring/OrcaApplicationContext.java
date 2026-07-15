@@ -7,11 +7,12 @@ import java.util.concurrent.ConcurrentHashMap;
 public class OrcaApplicationContext {
     private Class configClass;
     private ConcurrentHashMap<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, Object> singletonObject = new ConcurrentHashMap<>();
 
     public OrcaApplicationContext(Class configClass) {
         this.configClass = configClass;
 
-        // Scanning
+        // Scanning - beandefinition - beanDefinitionMap
         if (configClass.isAnnotationPresent(ComponentScan.class)) {
             ComponentScan componentScanAnnotation = (ComponentScan) configClass.getAnnotation(ComponentScan.class);
 
@@ -59,10 +60,41 @@ public class OrcaApplicationContext {
                     }
                 }
             }
+
+            // 实例话单例Bean
+            for (String beanName : beanDefinitionMap.keySet()) {
+                BeanDefinition beanDefinition = beanDefinitionMap.get(beanName);
+                if (beanDefinition.getScope().equals("singleton")) {
+                    Object bean = createBean(beanName, beanDefinition);
+                    singletonObject.put(beanName, bean);
+                }
+
+            }
         }
     }
 
-    public Object getBean(String beanName) {
+    private Object createBean(String beanName, BeanDefinition beanDefinition) {
         return null;
+    }
+
+    public Object getBean(String beanName) {
+
+        BeanDefinition beanDefinition = beanDefinitionMap.get(beanName);
+        if (beanDefinition == null) {
+            throw new NullPointerException();
+        } else {
+            String scope = beanDefinition.getScope();
+            if (scope.equals("singleton")) {
+                Object bean = singletonObject.get(beanName);
+                if (bean == null) {
+                    bean = createBean(beanName, beanDefinition);
+                    singletonObject.put(beanName, bean);
+                }
+                return bean;
+            } else {
+                // prototype 多例
+                return createBean(beanName, beanDefinition);
+            }
+        }
     }
 }
