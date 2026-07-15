@@ -99,6 +99,13 @@ public class OrcaApplicationContext {
                 ((BeanNameAware) instance).setBeanName(beanName);
             }
 
+            // 初始化
+            if (instance instanceof InitializingBean) {
+                ((InitializingBean) instance).afterPropertiesSet();
+            }
+
+            // 初始化 AOP
+
             return instance;
         } catch (InstantiationException e) {
             throw new RuntimeException(e);

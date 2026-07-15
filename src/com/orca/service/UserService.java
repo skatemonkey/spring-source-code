@@ -1,13 +1,10 @@
 package com.orca.service;
 
-import com.orca.spring.Autowired;
-import com.orca.spring.BeanNameAware;
-import com.orca.spring.Component;
-import com.orca.spring.Scope;
+import com.orca.spring.*;
 
 @Component()
 @Scope("prototype")
-public class UserService implements BeanNameAware {
+public class UserService implements BeanNameAware, InitializingBean {
 
     @Autowired
     private OrderService orderService;
@@ -19,6 +16,10 @@ public class UserService implements BeanNameAware {
         this.beanName = beanName;
     }
 
+    @Override
+    public void afterPropertiesSet() {
+        System.out.println("初始化");
+    }
     public void test() {
         System.out.println(orderService);
     }
