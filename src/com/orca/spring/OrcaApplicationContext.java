@@ -2,9 +2,11 @@ package com.orca.spring;
 
 import java.io.File;
 import java.net.URL;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class OrcaApplicationContext {
     private Class configClass;
+    private ConcurrentHashMap<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>();
 
     public OrcaApplicationContext(Class configClass) {
         this.configClass = configClass;
@@ -32,9 +34,22 @@ public class OrcaApplicationContext {
                         className = className.replace("\\", "."); // com.orca.service.UserService
 
                         try {
-                            Class<?> clazz = classLoader.loadClass("");
+                            Class<?> clazz = classLoader.loadClass(className);
                             if (clazz.isAnnotationPresent(Component.class)) {
-                                // Bean
+
+                                Component component = clazz.getAnnotation(Component.class);
+                                String beanName = component.value();
+                                // BeanDefinition
+                                BeanDefinition beanDefinition = new BeanDefinition();
+                                beanDefinition.setType(clazz);
+
+                                if (clazz.isAnnotationPresent(Scope.class)) {
+                                    Scope scopeAnnotation = clazz.getAnnotation(Scope.class);
+                                    beanDefinition.setScope(scopeAnnotation.value());
+                                } else {
+                                    beanDefinition.setScope("singleton");
+                                }
+                                beanDefinitionMap.put(beanName, beanDefinition);
 
                             }
                         } catch (ClassNotFoundException e) {
