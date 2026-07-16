@@ -4,7 +4,7 @@ import com.orca.spring.*;
 
 @Component()
 @Scope("prototype")
-public class UserService {
+public class UserService implements UserInterface{
 
     @Autowired
     private OrderService orderService;

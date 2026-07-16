@@ -117,7 +117,7 @@ public class OrcaApplicationContext {
             }
 
             for (BeanPostProcessor beanPostProcessor : beanPostProcessorArrayList) {
-                beanPostProcessor.postProcessBeforeInitialization(beanName, instance);
+                instance = beanPostProcessor.postProcessBeforeInitialization(beanName, instance);
             }
 
             // 初始化
@@ -127,7 +127,7 @@ public class OrcaApplicationContext {
 
             // BeanPostProcessor 初始化 AOP
             for (BeanPostProcessor beanPostProcessor : beanPostProcessorArrayList) {
-                beanPostProcessor.postProcessAfterInitialization(beanName, instance);
+                instance = beanPostProcessor.postProcessAfterInitialization(beanName, instance);
             }
 
             return instance;
