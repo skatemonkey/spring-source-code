@@ -16,5 +16,7 @@ course. This is a learning project, so keep implementations simple and clear.
 Keep documentation concise and follow this format:
 
 - Leave only the document title unnumbered.
-- Number headings as `1`, `2`, `3`, and subheadings as `1.1`, `1.2`, and so on.
-- Put a table of contents after the title with links to every content heading.
+- Use one heading per video stage with its title, such as `1. Stage One: Application Context Shell`.
+- Put a short summary in blockquote style below the stage heading.
+- List the work within each stage as numbered steps without extra section headings.
+- Put a linked table of contents in blockquote style after the title, without a table-of-contents heading.
