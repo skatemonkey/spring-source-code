@@ -5,12 +5,15 @@ import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class OrcaApplicationContext {
     private Class configClass;
+
     private ConcurrentHashMap<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>();
     private ConcurrentHashMap<String, Object> singletonObject = new ConcurrentHashMap<>();
+    private ArrayList<BeanPostProcessor> beanPostProcessorArrayList = new ArrayList<>();
 
     public OrcaApplicationContext(Class configClass) {
         this.configClass = configClass;
@@ -41,6 +44,12 @@ public class OrcaApplicationContext {
                             Class<?> clazz = classLoader.loadClass(className);
                             if (clazz.isAnnotationPresent(Component.class)) {
 
+
+                                if (BeanPostProcessor.class.isAssignableFrom(clazz)) {
+                                    BeanPostProcessor instance = (BeanPostProcessor) clazz.getDeclaredConstructor().newInstance();
+                                    beanPostProcessorArrayList.add(instance);
+                                }
+
                                 Component component = clazz.getAnnotation(Component.class);
                                 String beanName = component.value();
 
@@ -63,6 +72,14 @@ public class OrcaApplicationContext {
                             }
                         } catch (ClassNotFoundException e) {
                             e.printStackTrace();
+                        } catch (InvocationTargetException e) {
+                            throw new RuntimeException(e);
+                        } catch (InstantiationException e) {
+                            throw new RuntimeException(e);
+                        } catch (IllegalAccessException e) {
+                            throw new RuntimeException(e);
+                        } catch (NoSuchMethodException e) {
+                            throw new RuntimeException(e);
                         }
 
                     }
@@ -99,12 +116,19 @@ public class OrcaApplicationContext {
                 ((BeanNameAware) instance).setBeanName(beanName);
             }
 
+            for (BeanPostProcessor beanPostProcessor : beanPostProcessorArrayList) {
+                beanPostProcessor.postProcessBeforeInitialization(beanName, instance);
+            }
+
             // 初始化
             if (instance instanceof InitializingBean) {
                 ((InitializingBean) instance).afterPropertiesSet();
             }
 
-            // 初始化 AOP
+            // BeanPostProcessor 初始化 AOP
+            for (BeanPostProcessor beanPostProcessor : beanPostProcessorArrayList) {
+                beanPostProcessor.postProcessAfterInitialization(beanName, instance);
+            }
 
             return instance;
         } catch (InstantiationException e) {
